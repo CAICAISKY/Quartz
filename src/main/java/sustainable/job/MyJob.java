@@ -4,11 +4,14 @@ import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
+
 /**
  * @author schuyler
  */
 @PersistJobDataAfterExecution
-public class MyJob implements Job {
+@DisallowConcurrentExecution
+public class MyJob implements Job,Serializable {
     private static Logger logger = LoggerFactory.getLogger(MyJob.class);
     public void execute(JobExecutionContext context) throws JobExecutionException {
         logger.info("running......");

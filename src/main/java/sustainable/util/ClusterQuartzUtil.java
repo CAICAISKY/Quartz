@@ -36,6 +36,9 @@ public class ClusterQuartzUtil {
         return JobBuilder
                 .newJob(clazz)
                 .withIdentity(jobName, jobGroup)
+                //requestsRecovery属性必须设置为 true，当Quartz服务被中止后，再次启动或集群中其他机器接手任务时会尝试恢复执行之前未完成的所有任务
+                //尝试了一下。。不设置时默认为true
+                .requestRecovery(true)
                 .usingJobData("count", 0)
                 .build();
     }

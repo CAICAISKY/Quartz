@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <!--创建任务详情-->
+    <bean id="jobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <!--指定执行任务具体类-->
+        <property name="jobClass" value="sustainable.job.SpringClusterQuartzJob"/>
+        <!--使用Job状态-->
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="count" value-type="java.lang.Integer" value="0"/>
+            </map>
+        </property>
+        <!--无绑定的触发器也不会删除该任务-->
+        <property name="durability" value="true"/>
+        <!--再次启动或集群中其他机器接手任务时会尝试恢复执行之前未完成的所有任务-->
+        <property name="requestsRecovery" value="false"/>
+    </bean>
+
+    <!--创建触发器-->
+    <bean id="trigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="jobDetail"/>
+        <property name="cronExpression" value="0/5 * * * * ?"/>
+    </bean>
+
+    <!--创建调度器-->
+    <bean name="scheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <!--
+            org.springframework.scheduling.quartz.SchedulerFactoryBean这个类中把spring上下文以key/value的方式存放在了SchedulerContext中了，
+            可以用applicationContextSchedulerContextKey所定义的key得到对应spring的ApplicationContext
+        -->
+        <property name="applicationContextSchedulerContextKey" value="applicationContextKey" />
+        <!--指定配置文件位置-->
+        <property name="configLocation" value="classpath:quartz.properties" />
+        <!--设置触发器-->
+        <property name="triggers">
+            <list>
+                <ref bean="trigger"/>
+            </list>
+        </property>
+        <!--
+            设置spring加载即自动启动任务，需要配合bean标签中添加lazy-init="false"，一般在web项目中可以添加这个属性让服务已启动就自动启动任务
+           <property name="autoStartup" value="true"/>
+        -->
+    </bean>
+</beans>
